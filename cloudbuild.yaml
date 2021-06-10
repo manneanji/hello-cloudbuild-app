@@ -42,7 +42,7 @@ steps:
   entrypoint: 'bash'
   args: [
    '-c', 
-   'docker pull gcr.io/$PROJECT_ID/<nodeapp>:latest || exit 0'
+   'docker pull gcr.io/$PROJECT_ID/nodeapp:latest || exit 0'
   ]
 #step 2
 - name: gcr.io/cloud-builders/docker
@@ -66,8 +66,8 @@ steps:
    'set', 
    'image', 
    'deployment', 
-   '<app-name>', 
-   '<node app>=gcr.io/$PROJECT_ID/nodeapp:$BRANCH_NAME-$COMMIT_SHA'
+   'nodeapp', 
+   'nodeapp=gcr.io/$PROJECT_ID/nodeapp:$BRANCH_NAME-$COMMIT_SHA'
   ]
   env:
   - 'CLOUDSDK_COMPUTE_ZONE=${_CLOUDSDK_COMPUTE_ZONE}'
