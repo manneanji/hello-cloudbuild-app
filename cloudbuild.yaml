@@ -58,8 +58,8 @@ steps:
 - name: 'gcr.io/cloud-builders/kubectl'
   args: ['apply', '-f', 'k8s/']
   env:   
-  - 'location=${_CLOUDSDK_COMPUTE_ZONE}'
-  - 'cluster=${_CLOUDSDK_CONTAINER_CLUSTER}'
+  - 'CLOUDSDK_COMPUTE_REGION=${_CLOUDSDK_COMPUTE_ZONE}'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLOUDSDK_CONTAINER_CLUSTER}'
 #step 4
 - name: 'gcr.io/cloud-builders/kubectl'
   args: [
