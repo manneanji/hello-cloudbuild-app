@@ -70,10 +70,10 @@ steps:
    '<node app>=gcr.io/$PROJECT_ID/nodeapp:$BRANCH_NAME-$COMMIT_SHA'
   ]
   env:
-  - 'CLOUDSDK_COMPUTE_ZONE=<cluster-zone>'
-  - 'CLOUDSDK_CONTAINER_CLUSTER=<cluster-name>'
+  - 'CLOUDSDK_COMPUTE_ZONE=${_CLOUDSDK_COMPUTE_ZONE}'
+  - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLOUDSDK_CONTAINER_CLUSTER}'
 # push images to Google Container Registry with tags
 images: [
-   'gcr.io/$PROJECT_ID/nodeapp:$TAG_NAME',
+   'gcr.io/$PROJECT_ID/nodeapp:$BRANCH_NAME-$COMMIT_SHA',
    'gcr.io/$PROJECT_ID/nodeapp:latest'
   ]
