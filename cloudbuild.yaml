@@ -32,8 +32,8 @@ steps:
   - 'push'
   - 'gcr.io/$PROJECT_ID/hello-cloudbuild:$SHORT_SHA'
 # [END cloudbuild].
-
  
+#step 
 # [START cloudbuild-trigger-cd]
 # This step clones the hello-cloudbuild-env repository
 - name: 'gcr.io/cloud-builders/gcloud'
@@ -47,7 +47,6 @@ steps:
     git checkout candidate && \
     git config user.email $(gcloud auth list --filter=status:ACTIVE --format='value(account)')
     git config --global user.name "Google Container Builder"
-
 
 # This step generates the new manifest.
 - name: 'gcr.io/cloud-builders/gcloud'
