@@ -41,7 +41,7 @@
   args:
   - '-c'
   - |
-    git clone https://github.com/manneanji/hello-cloudbuild-env.git && \
+    gcloud source repos clone hello-cloudbuild-env && \
     cd hello-cloudbuild-env && \
     git checkout candidate && \
     git config user.email $(gcloud auth list --filter=status:ACTIVE --format='value(account)')
