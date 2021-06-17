@@ -33,7 +33,7 @@ steps:
   - 'gcr.io/$PROJECT_ID/hello-cloudbuild:$SHORT_SHA'
 # [END cloudbuild].
  
-#step 
+ 
 # [START cloudbuild-trigger-cd]
 # This step clones the hello-cloudbuild-env repository
 - name: 'gcr.io/cloud-builders/gcloud'
