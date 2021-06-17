@@ -32,7 +32,7 @@ spec:
       - name: hello-cloudbuild
         image: gcr.io/GOOGLE_CLOUD_PROJECT/hello-cloudbuild:COMMIT_SHA
         ports:
-        - containerPort: 8080
+        - containerPort: 3000
 ---
 kind: Service
 apiVersion: v1
@@ -44,5 +44,5 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 8080
+    targetPort: 3000
   type: LoadBalancer
