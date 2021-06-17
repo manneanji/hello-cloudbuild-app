@@ -33,7 +33,7 @@ steps:
   - 'gcr.io/$PROJECT_ID/hello-cloudbuild:$SHORT_SHA'
 # [END cloudbuild].
  
- 
+
 # [START cloudbuild-trigger-cd]
 # This step clones the hello-cloudbuild-env repository
 - name: 'gcr.io/cloud-builders/gcloud'
@@ -42,12 +42,18 @@ steps:
   args:
   - '-c'
   - |
-    git clone https://github.com/manneanji/hello-cloudbuild-app.git  && \
-    cd hello-cloudbuild-env && \
-    git checkout candidate && \
-    git config user.email $(gcloud auth list --filter=status:ACTIVE --format='value(account)')
-    git config --global user.name "Google Container Builder"
-
+    ACTIVE_ACCOUNT=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
+        apt update && apt install curl -y
+        curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.17.3/bin/linux/amd64/kubectl
+        cp kubectl /builder/google-cloud-sdk/bin/kubectl
+        chmod +x /builder/google-cloud-sdk/bin/kubectl
+        hub config --global credential.https://github.com.helper /usr/local/bin/hub-credential-helper
+        hub config --global hub.protocol https
+        hub config --global user.email "$${ACTIVE_ACCOUNT}"
+        hub config --global user.name "manneanji"
+        hub clone "${_GITHUB_OWNER}/${_GITHUB_DEPLOY_REPO}"
+        cd ${_GITHUB_DEPLOY_REPO}
+        git checkout candidate && \
 # This step generates the new manifest.
 - name: 'gcr.io/cloud-builders/gcloud'
   id: Generate manifest
