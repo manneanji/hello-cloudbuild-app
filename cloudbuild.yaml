@@ -48,7 +48,7 @@ steps:
     git config user.email $(gcloud auth list --filter=status:ACTIVE --format='value(account)')
     git config --global user.name "Google Container Builder"
 
-# This step generates the new manifest
+# This step generates the new manifest.
 - name: 'gcr.io/cloud-builders/gcloud'
   id: Generate manifest
   entrypoint: /bin/sh
