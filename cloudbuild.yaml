@@ -42,7 +42,7 @@ steps:
   args:
   - '-c'
   - |
-    gcloud source repos clone hello-cloudbuild-env && \
+    gcloud source repos clone manneanji/hello-cloudbuild-env && \
     cd hello-cloudbuild-env && \
     git checkout candidate && \
     git config user.email $(gcloud auth list --filter=status:ACTIVE --format='value(account)')
