@@ -47,11 +47,11 @@ steps:
         curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.17.3/bin/linux/amd64/kubectl
         cp kubectl /builder/google-cloud-sdk/bin/kubectl
         chmod +x /builder/google-cloud-sdk/bin/kubectl
-        hub config --global credential.https://github.com.helper /usr/local/bin/hub-credential-helper
-        hub config --global hub.protocol https
-        hub config --global user.email "$${ACTIVE_ACCOUNT}"
-        hub config --global user.name "manneanji"
-        hub clone "${_GITHUB_OWNER}/${_GITHUB_DEPLOY_REPO}"
+        git config --global credential.https://github.com.helper /usr/local/bin/hub-credential-helper
+        git config --global hub.protocol https
+        git config --global user.email "$${ACTIVE_ACCOUNT}"
+        git config --global user.name "manneanji"
+        git clone "${_GITHUB_OWNER}/${_GITHUB_DEPLOY_REPO}"
         cd ${_GITHUB_DEPLOY_REPO}
         git checkout candidate && \
 # This step generates the new manifest.
