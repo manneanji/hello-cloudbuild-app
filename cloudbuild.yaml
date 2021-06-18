@@ -45,6 +45,7 @@ steps:
     git clone https://github.com/manneanji/hello-cloudbuild-env.git && \
     cd hello-cloudbuild-env && \
     git checkout candidate && \
+    git config --global --unset credential.helper
     git config --global credential.helper /usr/local/bin/git-credential-helper
     git config --global hub.protocol https
     git config --global user.email "mannem4chiru@gmail.com"
