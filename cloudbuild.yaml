@@ -1,79 +1,104 @@
-# Copyright 2018 Google LLC
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# User-defined substitutions:
+#   _CLOUDSDK_COMPUTE_ZONE
+#   _CLOUDSDK_CONTAINER_CLUSTER
+#   _GITHUB_USERNAME
+#   _KMS_KEY 
+#   _KMS_KEYRING
 #
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-# [START cloudbuild
 steps:
-# This step builds the container image.
-- name: 'gcr.io/cloud-builders/docker'
-  id: Build
-  args:
-  - 'build'
-  - '-t'
-  - 'gcr.io/$PROJECT_ID/hello-cloudbuild:$SHORT_SHA'
-  - '.'
+  # Build the helloworld container image.
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/${PROJECT_ID}/helloworld:$COMMIT_SHA'
+      - '.'
 
-# This step pushes the image to Container Registry
-# The PROJECT_ID and SHORT_SHA variables are automatically
-# replaced by Cloud Build.
-- name: 'gcr.io/cloud-builders/docker'
-  id: Push
-  args:
-  - 'push'
-  - 'gcr.io/$PROJECT_ID/hello-cloudbuild:$SHORT_SHA'
-# [END cloudbuild].
- # git config --global credential.helper /usr/local/bin/git-credential-helper
- # git config --global --unset credential.helper
-# [START cloudbuild-trigger-cd]
-# This step clones the hello-cloudbuild-env repository
-- name: 'gcr.io/cloud-builders/gcloud'
-  id: Clone env repository
-  entrypoint: /bin/sh
-  args:
-  - '-c'
-  - |
-    git clone https://github.com/manneanji/hello-cloudbuild-env.git && \
-    cd hello-cloudbuild-env && \
-    git checkout candidate && \
-    
-    git config --global credential.helper gcloud.sh
-    
-    git config --global user.email "mannem4chiru@gmail.com"
-    git config --global user.name "${_GITHUB_OWNER}"
-#
-# This step generates the new manifest.
-- name: 'gcr.io/cloud-builders/gcloud'
-  id: Generate manifest
-  entrypoint: /bin/sh
-  args:
-  - '-c'
-  - |
-     sed "s/GOOGLE_CLOUD_PROJECT/${PROJECT_ID}/g" kubernetes.yaml.tpl | \
-     sed "s/COMMIT_SHA/${SHORT_SHA}/g" > hello-cloudbuild-env/kubernetes.yaml
+  # Retrieve and decrypt the GitHub Hub configuration. 
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        gsutil cp gs://${PROJECT_ID}-helloworld-configs/hub.enc hub.enc
+        gcloud kms decrypt \
+          --ciphertext-file=hub.enc \
+          --plaintext-file=/config/hub \
+          --location=global \
+          --keyring=${_KMS_KEYRING} \
+          --key=${_KMS_KEY}
+    volumes:
+      - name: 'config'
+        path: /config
 
-# This step pushes the manifest back to hello-cloudbuild-env
-- name: 'gcr.io/cloud-builders/gcloud'
-  id: Push manifest
-  entrypoint: /bin/sh
-  args:
-  - '-c'
-  - |
-    set -x && \
-    cd hello-cloudbuild-env && \
-    git add kubernetes.yaml && \
-    git commit -m "Deploying image gcr.io/${PROJECT_ID}/hello-cloudbuild:${SHORT_SHA}
-    Built from commit ${COMMIT_SHA} of repository hello-cloudbuild-app
-    Author: $(git log --format='%an <%ae>' -n 1 HEAD)" && \
-    git push origin candidate
+  # Generate a kubeconfig file for the given GKE cluster.
+  - name: 'gcr.io/cloud-builders/kubectl'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=${_CLOUDSDK_COMPUTE_ZONE}'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLOUDSDK_CONTAINER_CLUSTER}'
+      - 'KUBECONFIG=/kube/config'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        CLUSTER=$$(gcloud config get-value container/cluster)
+        PROJECT=$$(gcloud config get-value core/project)
+        ZONE=$$(gcloud config get-value compute/zone)
+      
+        gcloud container clusters get-credentials "$${CLUSTER}" \
+          --project "$${PROJECT}" \
+          --zone "$${ZONE}"
+    volumes:
+      - name: 'kube'
+        path: /kube
 
-# [END cloudbuild-trigger-cd]
+  # Clone the helloworld-infrastructure repo which holds the Kubernetes
+  # deployment manifests.
+  - name: 'gcr.io/hightowerlabs/hub'
+    env:
+      - 'HUB_CONFIG=/config/hub'
+      - 'KUBECONFIG=/kube/config'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        ACTIVE_ACCOUNT=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
+        hub config --global credential.https://github.com.helper /usr/local/bin/hub-credential-helper
+        hub config --global hub.protocol https
+        hub config --global user.email "$${ACTIVE_ACCOUNT}"
+        hub config --global user.name "Google Container Builder"
+        hub clone "https://github.com/manneanji/hello-cloudbuild-env.git"
+        cd hello-cloudbuild-env.git
+        git checkout candidate 
+        cat <<EOF > patch.yaml
+        spec:
+          template:
+            spec:
+              containers:
+                - name: helloworld
+                  image: gcr.io/${PROJECT_ID}/helloworld:$COMMIT_SHA
+        EOF
+        kubectl patch --local -o yaml \
+          -f hello-cloudbuild-env/cloudbuild-delivery.yaml \
+          -p "$(cat patch.yaml)" \
+          > cloudbuild-delivery.yaml
+        mv cloudbuild-delivery.yaml hello-cloudbuild-env/cloudbuild-delivery.yaml
+        hub add hello-cloudbuild-env/cloudbuild-delivery.yaml
+              
+        hub commit -F- <<EOF
+        Update the helloworld application
+        This commit updates the helloworld deployment container image to:
+            gcr.io/${PROJECT_ID}/helloworld:$COMMIT_SHA.
+        Build ID: ${BUILD_ID}
+        EOF
+        hub push origin candidate
+    volumes:
+      - name: 'config'
+        path: /config
+      - name: 'kube'
+        path: /kube
+
+images:
+  - gcr.io/${PROJECT_ID}/helloworld:$COMMIT_SHA
