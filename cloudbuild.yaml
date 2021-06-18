@@ -47,8 +47,7 @@ steps:
     git checkout candidate && \
     git config  user.email "$${ACTIVE_ACCOUNT}"
     git config  user.name "${_GITHUB_OWNER}"
-    
-#new
+
 # This step generates the new manifest.
 - name: 'gcr.io/cloud-builders/gcloud'
   id: Generate manifest
