@@ -46,8 +46,8 @@ steps:
     cd hello-cloudbuild-env && \
     git checkout candidate && \
     
-    git config --global user.email "mannem4chiru@gmai.com"
-    git config --global user.name "${_GITHUB_OWNER}"
+    git config  user.email "mannem4chiru@gmai.com"
+    git config  user.name "${_GITHUB_OWNER}"
 
 # This step generates the new manifest.
 - name: 'gcr.io/cloud-builders/gcloud'
