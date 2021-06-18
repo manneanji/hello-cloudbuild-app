@@ -48,6 +48,7 @@ steps:
     git config --global user.email "mannem4chiru@gmai.com"
     git config --global user.name "${_GITHUB_OWNER}"
 
+#copied again
 # This step generates the new manifest.
 - name: 'gcr.io/cloud-builders/gcloud'
   id: Generate manifest
