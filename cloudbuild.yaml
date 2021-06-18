@@ -46,7 +46,6 @@ steps:
     cd hello-cloudbuild-env && \
     git checkout candidate && \
     
-    git config --global credential.helper /usr/local/bin/credential.helper
     git config --global user.email "mannem4chiru@gmai.com"
     git config --global user.name "${_GITHUB_OWNER}"
 
