@@ -42,18 +42,12 @@ steps:
   args:
   - '-c'
   - |
-    ACTIVE_ACCOUNT=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
-        apt update && apt install curl -y
-        curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.17.3/bin/linux/amd64/kubectl
-        cp kubectl /builder/google-cloud-sdk/bin/kubectl
-        chmod +x /builder/google-cloud-sdk/bin/kubectl
-        git config --global credential.https://github.com.helper /usr/local/bin/hub-credential-helper
-        git config --global hub.protocol https
-        git config --global user.email "$${ACTIVE_ACCOUNT}"
-        git config --global user.name "manneanji"
-        git clone "${_GITHUB_OWNER}/${_GITHUB_DEPLOY_REPO}"
-        cd ${_GITHUB_DEPLOY_REPO}
-        git checkout candidate && \
+    gcloud source repos clone hello-cloudbuild-env && \
+    cd hello-cloudbuild-env && \
+    git checkout candidate && \
+    git config user.email $(gcloud auth list --filter=status:ACTIVE --format='value(account)')
+
+    
 # This step generates the new manifest.
 - name: 'gcr.io/cloud-builders/gcloud'
   id: Generate manifest
