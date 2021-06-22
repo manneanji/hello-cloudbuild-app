@@ -54,7 +54,7 @@ steps:
       - name: 'kube'
         path: /kube
 
-  # Clone the helloworld-infrastructure repo which holds the Kubernetes
+  # Clone the hello-cloudbuild-env repo which holds the Kubernetes
   # deployment manifests.
   - name: 'gcr.io/hightowerlabs/hub'
     env:
@@ -85,7 +85,7 @@ steps:
           -p "$(cat patch.yaml)" \
           > cloudbuild-delivery.yaml
         mv cloudbuild-delivery.yaml hello-cloudbuild-env/cloudbuild-delivery.yaml
-        hub add hello-cloudbuild-env/cloudbuild-delivery.yaml
+        hub add hello-cloudbuild-env/helloworld.yaml
               
         hub commit -F- <<EOF
         Update the helloworld application
