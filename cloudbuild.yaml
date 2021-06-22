@@ -70,8 +70,8 @@ steps:
         hub config --global hub.protocol https
         hub config --global user.email "$${ACTIVE_ACCOUNT}"
         hub config --global user.name "Google Container Builder"
-        hub clone "https://github.com/manneanji/hello-cloudbuild-env.git"
-        cd hello-cloudbuild-env.git
+        hub clone "${_GITHUB_USERNAME}/${_GITHUB_DEPLOY_REPO}"
+        cd ${_GITHUB_DEPLOY_REPO}
         git checkout candidate 
         cat <<EOF > patch.yaml
         spec:
@@ -82,11 +82,11 @@ steps:
                   image: gcr.io/${PROJECT_ID}/helloworld:$COMMIT_SHA
         EOF
         kubectl patch --local -o yaml \
-          -f hello-cloudbuild-env/cloudbuild-delivery.yaml \
+          -f kubernetes/deployment.yml \
           -p "$(cat patch.yaml)" \
-          > cloudbuild-delivery.yaml
-        mv cloudbuild-delivery.yaml hello-cloudbuild-env/cloudbuild-delivery.yaml
-        hub add hello-cloudbuild-env/helloworld.yaml
+          > deployment.yml
+        mv deployment.yml kubernetes/deployment.yml
+        hub add kubernetes/deployment.yml
               
         hub commit -F- <<EOF
         Update the helloworld application
