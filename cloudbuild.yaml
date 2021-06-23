@@ -107,3 +107,4 @@ steps:
 
 images:
   - gcr.io/${PROJECT_ID}/helloworld:$COMMIT_SHA
+  #
