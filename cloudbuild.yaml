@@ -23,13 +23,13 @@ steps:
     args:
       - '-c'
       - |
-        gsutil cp gs://${PROJECT_ID}-pipeline2-configs/hub.enc hub.enc
+        gsutil cp gs://${PROJECT_ID}-newkey-configs/hub.enc hub.enc
         gcloud kms decrypt \
-          --ciphertext-file=hub.enc \
-          --plaintext-file=/config/hub \
-          --location=global \
-          --keyring=${_KMS_KEYRING} \
-          --key=${_KMS_KEY}
+          --ciphertext-file hub.enc \
+          --plaintext-file /config/hub \
+          --location global \
+          --keyring ${_KMS_KEYRING} \
+          --key ${_KMS_KEY}
     volumes:
       - name: 'config'
         path: /config
