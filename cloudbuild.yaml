@@ -16,7 +16,6 @@ steps:
       - 'gcr.io/${PROJECT_ID}/helloworld:$COMMIT_SHA'
       - '.'
 
-  #update
   # Retrieve and decrypt the GitHub Hub configuration. 
   - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'sh'
